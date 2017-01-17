@@ -19,7 +19,9 @@ public class CharacterEncodingFilter implements javax.servlet.Filter {
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain nextFilter)
 			throws IOException, ServletException {
-		// TODO Auto-generated method stub
+		req.setCharacterEncoding(config.getInitParameter("encoding"));
+		nextFilter.doFilter(req, resp);	
+		
 	}
 
 	@Override

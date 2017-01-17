@@ -1,18 +1,20 @@
 package servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import vo.Member;
 
 public class MemberListServlet extends HttpServlet {
 	Connection conn;
@@ -21,30 +23,30 @@ public class MemberListServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/html; charset=UTF-8");
-		PrintWriter out = resp.getWriter();
-		out.println("<html><head><title>회원목록</title></head>");
-		out.println("<body><a href='add'>신규회원</a></br>");
-		out.println("</body></html>");
 		try {
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-			conn = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:XE", "kms", "1234");
+			ServletContext sc = this.getServletContext();
+			conn = (Connection)sc.getAttribute("conn");
 			stmt = conn.prepareStatement("select * from members");
 			rs = stmt.executeQuery();
+			ArrayList<Member> members = new ArrayList();
 			while(rs.next())
 			{
-				out.println(rs.getString("MNO"));
-				out.println("<a href=update?mno="+rs.getString("MNO")+">"+rs.getString("MNAME")+"</a>");
-				out.println(rs.getString("EMAIL"));
-				out.println(rs.getString("CRE_DATE"));
-				out.println("<a href=delete?mno="+rs.getString("MNO")+">"+"삭제"+"</a>");
-				out.println("</br>");
+				members.add(new Member()
+						.setNo(rs.getInt("MNO"))
+						.setName(rs.getString("MNAME"))
+						.setEmail(rs.getString("EMAIL"))
+						.setCreatedDate(rs.getDate("CRE_DATE"))
+						.setModifiedDate(rs.getDate("MOD_DATE")));
 			};
-		} catch (ClassNotFoundException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			req.setAttribute("members", members);
+			RequestDispatcher rd = req.getRequestDispatcher("/member/MemberList.jsp");
+			rd.include(req,resp);
+		} catch ( ServletException | SQLException e ) {
+			req.setAttribute("error", e);
+			RequestDispatcher rd = req.getRequestDispatcher("/Error.jsp");
+			rd.forward(req, resp);
 		}finally{
 			try {
-				if(conn!=null)conn.close();
 				if(stmt!=null)stmt.close();
 				if(rs!=null)rs.close();
 			} catch (SQLException e) {

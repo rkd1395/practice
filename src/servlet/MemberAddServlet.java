@@ -40,8 +40,7 @@ public class MemberAddServlet extends HttpServlet {
 		String password =  req.getParameter("password");
 		String name = req.getParameter("name");
 		try {
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-			conn = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:XE", "kms", "1234");
+			conn = (Connection)this.getServletContext().getAttribute("conn");
 			pstmt = conn.prepareStatement("insert into members values(MEMBERS_SEQ.nextval,?,?,?,sysdate,sysdate)");
 			pstmt.setString(1, email);
 			pstmt.setString(2, password);
@@ -54,12 +53,11 @@ public class MemberAddServlet extends HttpServlet {
 			out.println("<body><p>등록 성공입니다</p></body>");
 			out.println("</html>");
 			resp.addHeader("Refresh", "1;url=list");
-		} catch (SQLException | ClassNotFoundException e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
-				if(conn!=null)conn.close();
 				if(pstmt!=null)pstmt.close();
 				if(rs!=null)rs.close();
 			} catch (SQLException e) {

@@ -23,13 +23,12 @@ public class MemberDeleteServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		sc = this.getServletContext();
 		try {
-			Class.forName(sc.getInitParameter("driver"));
-			conn = DriverManager.getConnection(sc.getInitParameter("url"),sc.getInitParameter("id"),sc.getInitParameter("password"));
+			conn=(Connection)this.getServletContext().getAttribute("conn");
 			pstmt=conn.prepareStatement("delete from members where mno=?");
 			pstmt.setInt(1, Integer.parseInt(req.getParameter("mno")));
 			pstmt.executeUpdate();
 			resp.sendRedirect("list");
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

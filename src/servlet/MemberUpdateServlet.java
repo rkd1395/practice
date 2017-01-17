@@ -24,10 +24,7 @@ public class MemberUpdateServlet extends HttpServlet {
 		try {
 			sc = this.getServletContext();
 
-			Class.forName(sc.getInitParameter("driver"));
-			conn = DriverManager.getConnection(sc.getInitParameter("url"),
-					sc.getInitParameter("id"),
-					sc.getInitParameter("password"));
+			conn=(Connection)sc.getAttribute("conn");
 			pstmt = conn.prepareStatement("select MNO,Email,Mname,Cre_date from members"
 					+ " where mno=?");
 			pstmt.setString(1, req.getParameter("mno"));
@@ -50,12 +47,11 @@ public class MemberUpdateServlet extends HttpServlet {
 			}
 			out.print("</body></html>");
 			out.print("</form>");
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally{
 			try {
-				if(conn!=null)conn.close();
 				if(pstmt!=null)pstmt.close();
 				if(rs!=null)rs.close();
 			} catch (SQLException e) {
